@@ -22,6 +22,7 @@ from ..helpers import (
     leniently_validate_youtube_id,
     escape_for_xml,
     get_itunes_artwork,
+    get_itunes_name
 )
 from ..models import EpisodeDetails, ServiceConfig, FeedOptions
 
@@ -109,8 +110,21 @@ def populate_feed_generator(
     playlist_episode_feed: YoutubePlaylistEpisodeFeed, generator_options: FeedOptions
 ) -> FeedGenerator:
     playlist_details = playlist_episode_feed.playlist_details
+    podcast_config = generator_options.podcast_config
     feed_generator = FeedGenerator()
-    feed_generator.title(escape_for_xml(playlist_details.title))
+    logging.info("Start to grab iTunes name")
+    if podcast_config is not None:
+        if podcast_config.itunes_id is not None:
+            try:
+                feed_generator.title(escape_for_xml(get_itunes_name(podcast_config.itunes_id)))
+                logging.info(f"feed generator title 1: {feed_generator.title()}")
+            except ValueError as exception:
+                logging.error("Failed to grab iTunes name", exception)
+                feed_generator.title(escape_for_xml(playlist_details.title))
+        else:
+            logging.error("podcast_config.itunes_id is None")
+    else:
+        logging.error("podcast_config is None")
     youtube_playlist_url = (
         f"https://www.youtube.com/playlist?{urlencode({'list': playlist_details.id})}"
     )
@@ -125,7 +139,6 @@ def populate_feed_generator(
         )
     )
     feed_generator.load_extension("podcast")
-    podcast_config = generator_options.podcast_config
     # noinspection PyUnresolvedReferences
     podcast_feed_generator = feed_generator.podcast
     podcast_feed_generator.itunes_author(playlist_details.author.name)

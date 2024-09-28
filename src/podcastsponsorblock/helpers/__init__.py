@@ -1,3 +1,4 @@
+import logging
 import re
 from datetime import timedelta
 from urllib.parse import urlparse
@@ -44,6 +45,26 @@ def get_itunes_artwork(itunes_id: str) -> str:
     )
 
 
+def get_itunes_name(itunes_id: str) -> str:
+    itunes_response = requests.get(
+        "https://itunes.apple.com/lookup?id=", params={"id": itunes_id}
+    )
+    if itunes_response.status_code != 200:
+        raise ValueError(f"Invalid iTunes ID: {itunes_id}")
+    itunes_results = itunes_response.json().get("results", tuple())
+    if len(itunes_results) != 1:
+        raise ValueError(
+            f"{len(itunes_results)} results found for iTunes ID: {itunes_id}"
+        )
+    matching_podcast = itunes_results[0]
+    name_key = next(
+        (key for key in matching_podcast.keys() if key.startswith("collectionName")), None
+    )
+    if name_key is None:
+        raise ValueError(f"iTunes ID missing collectionName: {itunes_id}")
+    return matching_podcast[name_key]
+
+
 def leniently_validate_youtube_id(potential_youtube_id: str) -> bool:
     return _LENIENT_YOUTUBE_ID_PATTERN.match(potential_youtube_id) is not None
 
@@ -66,4 +87,5 @@ __all__ = [
     "leniently_validate_youtube_id",
     "escape_for_xml",
     "get_itunes_artwork",
+    "get_itunes_name",
 ]

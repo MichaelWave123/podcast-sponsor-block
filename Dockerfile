@@ -2,13 +2,13 @@ FROM python:3.12.1-slim-bookworm
 
 RUN apt-get update -qq && apt-get install ffmpeg -y
 
-ARG user=appuser
-ARG group=appuser
-ARG user_id=1000
-ARG group_id=1000
-RUN groupadd -g ${group_id} ${group}
-RUN useradd -u ${user_id} -g ${group} -s /bin/sh -m ${user}
-USER ${user_id}:${group_id}
+#ARG user=appuser
+#ARG group=appuser
+#ARG user_id=1000
+#ARG group_id=1000
+#RUN groupadd -g ${group_id} ${group}
+#RUN useradd -u ${user_id} -g ${group} -s /bin/sh -m ${user}
+#USER ${user_id}:${group_id}
 
 ENV PATH="/home/${user}/.local/bin:${PATH}"
 COPY requirements.txt requirements.txt
@@ -22,8 +22,9 @@ CMD [ \
     "--log-level=info", \
     "--logger-class=podcastsponsorblock.AuthKeyFilteringLogger", \
     "--workers=5", \
+    "--timeout=120", \
     "--log-file=-", \
     "--access-logfile=-", \
     "-b=0.0.0.0:8080", \
     "podcastsponsorblock:create_app()" \
-]
+    ]

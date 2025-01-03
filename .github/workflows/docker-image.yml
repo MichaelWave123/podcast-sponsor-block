@@ -2,21 +2,23 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile -t michaelwave123/pod-sponsor-block:latest
-    - name: push image to dockerhub
-      run: | 
-        docker login -u michaelwave123 -p ${{ secrets.DOCKER_HUB_TOKEN }}
-        docker push michaelwave123/pod-sponsor-block:latest
+      - uses: actions/checkout@v4
+      - name: Build the Docker image
+        run: docker build . --file Dockerfile -t michaelwave123/pod-sponsor-block:latest
+      - name: login to docker hub
+        uses: docker/login-action@v3
+        with:
+          username: michaelwave123
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+      - name: push image to dockerhub
+        run: |
+          docker push michaelwave123/pod-sponsor-block:latest

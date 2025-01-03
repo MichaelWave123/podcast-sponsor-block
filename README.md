@@ -1,6 +1,6 @@
 # podcast-sponsor-block
 
-# test
+# Modified to grab the podcast name from iTunes instead of youtube
 
 ### What is it?
 

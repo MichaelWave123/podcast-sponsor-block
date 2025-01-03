@@ -18,4 +18,5 @@ jobs:
       run: docker build . --file Dockerfile -t michaelwave123/pod-sponsor-block:latest
     - name: push image to dockerhub
       run: | 
+        docker login - u michaelwave123 -p ${{ secrets.docker_hub_token}}
         docker push michaelwave123/pod-sponsor-block:latest
